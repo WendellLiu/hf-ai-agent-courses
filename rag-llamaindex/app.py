@@ -1,41 +1,25 @@
+import asyncio
+from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
-import os
-from dotenv import load_dotenv
 
-# Load the .env file
-# load_dotenv()
-#
-# # Retrieve HF_TOKEN from the environment variables
-# hf_token = os.getenv("HF_TOKEN")
-#
-# llm = HuggingFaceInferenceAPI(
-#     model_name="Qwen/Qwen2.5-Coder-32B-Instruct",
-#     temperature=0.7,
-#     max_tokens=100,
-#     token=hf_token,
-# )
-#
-# response = llm.complete("Hello, how are you?")
-# print(response)
+from retriever import guest_info_tool
 
-import datasets
-from llama_index.core.schema import Document
 
-# Load the dataset
-guest_dataset = datasets.load_dataset("agents-course/unit3-invitees", split="train")
+# Initialize the Hugging Face model
+llm = HuggingFaceInferenceAPI(model_name="Qwen/Qwen2.5-Coder-32B-Instruct")
 
-# Convert dataset entries into Document objects
-docs = [
-    Document(
-        text="\n".join(
-            [
-                f"Name: {guest_dataset['name'][i]}",
-                f"Relation: {guest_dataset['relation'][i]}",
-                f"Description: {guest_dataset['description'][i]}",
-                f"Email: {guest_dataset['email'][i]}",
-            ]
-        ),
-        metadata={"name": guest_dataset["name"][i]},
-    )
-    for i in range(len(guest_dataset))
-]
+# Create Alfred, our gala agent, with the guest info tool
+alfred = AgentWorkflow.from_tools_or_functions(
+    [guest_info_tool],
+    llm=llm,
+)
+
+
+async def main():
+    # Run the agent with a sample query
+    response = await alfred.run("Tell me about our guest named 'Lady Ada Lovelace'.")
+    print("🎩 Alfred's Response:")
+    print(response)
+
+
+asyncio.run(main())
