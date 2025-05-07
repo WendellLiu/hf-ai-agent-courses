@@ -4,7 +4,10 @@ from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 
 from retriever import guest_info_tool
 from tools.search_tool import search_tool
+from dotenv import load_dotenv
 
+# Load the .env file
+load_dotenv()
 
 # Initialize the Hugging Face model
 llm = HuggingFaceInferenceAPI(model_name="Qwen/Qwen2.5-Coder-32B-Instruct")
@@ -19,7 +22,8 @@ alfred = AgentWorkflow.from_tools_or_functions(
 async def main():
     # Run the agent with a sample query
     # response = await alfred.run("Tell me about our guest named 'Lady Ada Lovelace'.")
-    response = await alfred.run("Who's the current President of France?")
+    # response = await alfred.run("Who's the current President of France?")
+    response = await alfred.run("What is the weather tomorrow in Paris?")
     print("🎩 Alfred's Response:")
     print(response)
 
